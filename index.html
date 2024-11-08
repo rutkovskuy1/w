@@ -1,0 +1,75 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>skelet</title> 
+</head> 
+<body> 
+    <canvas id="canvas" width="600" height="400"></canvas>  
+
+    <script> 
+
+        const FRAME_RATE = 5; // Частота кадрів, кадрів за секунду 
+        const FRAME_DELAY = 1000 / FRAME_RATE; // Затримка між кадрами у мілісекундах 
+        const TOTAL_FRAMES = 8; // Загальна кількість кадрів у анімації 
+        const SPRITE_WIDTH = 400; // Ширина спрайта 
+        const SPRITE_SPEED = 5;   // Швидкість руху спрайта 
+
+        // Стан анімації 
+        let currentFrameIndex = 1; // Поточний кадр анімації 
+        let lastFrameTime = 0; // Час останнього оновлення анімації 
+        let spritePositionX = 0;  // Початкова позиція спрайта по осі X 
+        let movementDirection = 1; // Напрямок руху: 1 - вправо, -1 - вліво 
+
+        const canvasElement = document.getElementById('canvas'); // Отримання елемента <canvas> з DOM 
+        const drawingContext = canvasElement.getContext('2d'); // Отримання контексту малювання 2D 
+        const spriteImage = new Image(); // Створення нового об'єкта Image для завантаження кадрів 
+
+        // Обробка завантаження і відображення кадру 
+        spriteImage.onload = () => { // Після завантаження зображення кадру 
+            drawingContext.clearRect(0, 0, canvasElement.width, canvasElement.height); // Очищення попереднього кадру 
+
+            // Віддзеркалити зображення, якщо рух вліво 
+            if (movementDirection === -1) { // Якщо напрямок руху вліво 
+                drawingContext.save(); // Зберегти поточний стан canvas 
+                drawingContext.scale(-1, 1); // Віддзеркалити по осі X 
+                drawingContext.drawImage(spriteImage, -spritePositionX - SPRITE_WIDTH, canvasElement.height / 2 - SPRITE_WIDTH / 2, SPRITE_WIDTH, SPRITE_WIDTH);  
+                // Намалювати зображення спрайта віддзеркаленим 
+                drawingContext.restore(); // Відновити стан canvas після віддзеркалення 
+            } else {  
+                // Якщо рухається вправо, малюємо нормально 
+                drawingContext.drawImage(spriteImage, spritePositionX, canvasElement.height / 2 - SPRITE_WIDTH / 2, SPRITE_WIDTH, SPRITE_WIDTH);  
+                // Намалювати спрайт у нормальному напрямку 
+            } 
+        }; 
+
+        // Цикл анімації з використанням requestAnimationFrame 
+        function updateAnimation(currentTime) { // Функція оновлення анімації, яка отримує час виконання 
+            if (currentTime - lastFrameTime > FRAME_DELAY) { // Якщо пройшло достатньо часу для оновлення кадру 
+                if (currentFrameIndex > TOTAL_FRAMES) { // Якщо пройдено всі кадри, почати з першого 
+                    currentFrameIndex = 1; 
+                } 
+
+                // Оновити кадр 
+                spriteImage.src = `image${currentFrameIndex++}.png`; // Оновлення зображення кадру 
+
+                // Оновити позицію спрайта 
+                spritePositionX += SPRITE_SPEED * movementDirection; // Оновити положення спрайта відповідно до напрямку 
+
+                // Перевірити, чи досяг спрайт меж полотна 
+                if (spritePositionX + SPRITE_WIDTH >= canvasElement.width || spritePositionX <= 0) { // Якщо спрайт досяг краю 
+                    movementDirection *= -1; // Змінити напрямок руху 
+                } 
+
+                lastFrameTime = currentTime; // Оновити час останнього кадру 
+            } 
+
+            requestAnimationFrame(updateAnimation); // Запустити анімацію для наступного кадру 
+        } 
+
+    
+        requestAnimationFrame(updateAnimation); // Почати анімацію 
+    </script> 
+</body> 
+</html>
